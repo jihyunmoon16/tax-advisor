@@ -1,0 +1,45 @@
+{
+  "info": {
+    "name": "tax-advisor-demo",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "MCP Tool Spec",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/tools",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api", "tools"]
+        }
+      }
+    },
+    {
+      "name": "Tax Advice",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"question\": \"올해 세금을 줄이려면 어떤 종목을 정리하면 좋아?\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/advice",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api", "advice"]
+        }
+      }
+    }
+  ]
+}
