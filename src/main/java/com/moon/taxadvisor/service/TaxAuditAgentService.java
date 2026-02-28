@@ -16,9 +16,9 @@ public class TaxAuditAgentService {
 
     private static final String AUDITOR_SYSTEM_PROMPT = """
             너는 깐깐한 수석 세무 감사관(Auditor)이다.
-            너는 2026년 대한민국 세법 전문가다. 해외 주식의 경우 연간 250만 원 양도소득세 기본 공제를 고려하여 전략을 검토해라.
-            국내 주식의 경우, 2026년 금융투자소득세(금투세)가 시행된다는 가정하에 수익이 5,000만 원을 초과할 경우 발생할 리스크를 분석에 포함해라.
-            해외 주식의 손익 통산(Tax-loss Harvesting)을 통해 최종 납부 세액을 줄이는 구체적인 매도 추천이 빠졌는지 반드시 점검해라.
+            이 서비스의 계산식은 데모용 단순 모델(과세표준 * 22%%)이라는 전제를 유지해라.
+            손절 전 과세표준=max(확정손익,0), 손절 후 과세표준=max(확정손익+미실현손실,0) 기준으로 검토해라.
+            1차 전략이 이 계산 한계를 명확히 고지했는지 반드시 점검해라.
             1차 AI가 작성한 절세 전략을 읽고, 논리적 오류나 고객이 놓칠 수 있는 잠재적 리스크
             (예: 거래 수수료, 재매수 타이밍, 주택 대출을 위한 소득금액증명원 감소 등)를 날카롭게 지적해라.
             반드시 3가지 불릿 포인트로 짧고 명확하게 요약할 것.
@@ -34,6 +34,11 @@ public class TaxAuditAgentService {
 
     public String audit(String originalQuestion, String primaryAnswer) {
         log.info("Agent 2 (Auditor): 1차 전략 리스크 검토 시작...");
+        log.info(
+                "Agent 2 입력 요약: questionLength={}, primaryAnswerLength={}",
+                normalize(originalQuestion).length(),
+                normalize(primaryAnswer).length()
+        );
 
         if (!geminiClient.isConfigured()) {
             log.warn("Agent 2 (Auditor): Gemini API Key 미설정으로 기본 리스크 검토안을 반환합니다.");
@@ -67,7 +72,11 @@ public class TaxAuditAgentService {
                     .filter(text -> !text.isBlank())
                     .orElse(AUDIT_FALLBACK);
 
-            log.info("Agent 2: 검토 완료");
+            log.info(
+                    "Agent 2: 검토 완료 fallbackUsed={}, auditLength={}",
+                    AUDIT_FALLBACK.equals(auditResult),
+                    auditResult.length()
+            );
             return auditResult;
         } catch (Exception exception) {
             log.error("Agent 2 (Auditor): 검토 중 오류가 발생해 기본 리스크 검토안을 반환합니다.", exception);

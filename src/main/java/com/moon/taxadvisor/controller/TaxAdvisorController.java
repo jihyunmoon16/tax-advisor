@@ -77,26 +77,41 @@ public class TaxAdvisorController {
     }
 
     private PipelineResult executePipeline(String question) {
+        long pipelineStartedAt = System.currentTimeMillis();
+
         log.info("Pipeline Stage 1: Agent 1 전략 수립 시작");
+        long stage1StartedAt = System.currentTimeMillis();
         AgentResult primaryResult = taxAdvisorAgentService.advise(question);
         log.info(
-                "Pipeline Stage 1 완료: answerLength={}, iterations={}, fallbackUsed={}",
+                "Pipeline Stage 1 완료: answerLength={}, iterations={}, fallbackUsed={}, elapsedMs={}",
                 primaryResult.answer().length(),
                 primaryResult.iterations(),
-                primaryResult.fallbackUsed()
+                primaryResult.fallbackUsed(),
+                System.currentTimeMillis() - stage1StartedAt
         );
 
         log.info("Pipeline Stage 2: Agent 2 리스크 감사 시작");
+        long stage2StartedAt = System.currentTimeMillis();
         String auditReview = taxAuditAgentService.audit(question, primaryResult.answer());
-        log.info("Pipeline Stage 2 완료: auditLength={}", auditReview.length());
+        log.info(
+                "Pipeline Stage 2 완료: auditLength={}, elapsedMs={}",
+                auditReview.length(),
+                System.currentTimeMillis() - stage2StartedAt
+        );
 
         log.info("Pipeline Stage 3: Agent 3 인포그래픽 생성 시작");
+        long stage3StartedAt = System.currentTimeMillis();
         String base64Image = taxGraphicAgentService.createInfographic(
                 question,
                 primaryResult.answer(),
                 auditReview
         );
-        log.info("Pipeline Stage 3 완료: imageGenerated={}", !base64Image.isBlank());
+        log.info(
+                "Pipeline Stage 3 완료: imageGenerated={}, elapsedMs={}",
+                !base64Image.isBlank(),
+                System.currentTimeMillis() - stage3StartedAt
+        );
+        log.info("Advice Pipeline 완료: totalElapsedMs={}", System.currentTimeMillis() - pipelineStartedAt);
 
         return new PipelineResult(primaryResult, auditReview, base64Image);
     }

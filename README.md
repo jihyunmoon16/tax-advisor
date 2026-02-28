@@ -2,6 +2,7 @@
 
 Spring Boot 기반의 MCP-style Agentic Tax Advisor 백엔드입니다.  
 단순 질의응답 챗봇이 아니라, LLM이 함수 호출(`getUserPortfolio`, `getRealizedGains`)로 사용자 데이터를 직접 조회한 뒤 절세 전략을 수치로 제시합니다.
+세금 계산은 해커톤 데모용 단순 모델(`과세표준 x 22%`)을 사용합니다.
 
 ## 기술 스택
 
@@ -36,11 +37,17 @@ NANO_BANANA_MODEL=gemini-3.1-flash-image-preview
 ./gradlew bootRun
 ```
 
+선택: 로컬에서 H2 콘솔이 필요하면 실행 시 아래 값을 추가하세요.
+
+```bash
+H2_CONSOLE_ENABLED=true ./gradlew bootRun
+```
+
 ## DB 시연 데이터
 
-- `realized_gain` 합계가 `2,500,000원`
-- `portfolio`에 `-30%` 손실 종목 포함 (`LOSS_BIO`)
-- `WIN_AI` 종목은 `+5,000,000원` 미실현 수익으로 로그 시연 포인트 제공
+- `realized_gain` 합계가 `6,600,000원`
+- `portfolio`에 손실 종목 포함 (`TSLA`, 미실현 `-2,000,000원`)
+- `SAMSUNG_ELEC` 종목은 `+54,000,000원` 미실현 수익으로 로그 시연 포인트 제공
 
 ## API
 
@@ -61,18 +68,25 @@ NANO_BANANA_MODEL=gemini-3.1-flash-image-preview
 ```json
 {
   "userId": "me",
-  "answer": "...절세 전략...",
+  "question": "올해 세금을 줄이려면 어떤 종목을 정리하면 좋아?",
+  "primaryStrategy": "...절세 전략...",
+  "auditReview": "...리스크 검토...",
+  "base64Image": "",
   "iterations": 3,
   "fallbackUsed": false,
   "taxPreview": {
-    "realizedGain": 2500000,
-    "unrealizedLoss": -3000000,
-    "estimatedTaxBeforeHarvest": 550000,
-    "estimatedTaxAfterHarvest": 0,
-    "estimatedTaxSavings": 550000
+    "realizedGain": 6600000,
+    "unrealizedLoss": -2000000,
+    "estimatedTaxBeforeHarvest": 1452000,
+    "estimatedTaxAfterHarvest": 1012000,
+    "estimatedTaxSavings": 440000
   }
 }
 ```
+
+참고:
+- `fallbackUsed=true`는 Gemini 미설정/호출 실패 시 로컬 계산 기반 응답을 의미합니다.
+- `taxPreview`는 데모 계산식(`max(확정손익,0)`, `max(확정손익+미실현손실,0)`, `22%`) 기준입니다.
 
 ### 2) MCP Tool 스키마 확인
 
@@ -84,10 +98,11 @@ Gemini에 전달하는 함수 정의(JSON 규격)를 확인할 수 있습니다.
 
 실행 중 아래 로그가 출력됩니다.
 
-- `AI가 사용자의 포트폴리오 조회를 요청했습니다`
-- `DB에서 실시간 수익 5,000,000 원 감지`
-- `AI가 확정 손익 조회를 요청했습니다`
-- `DB에서 확정 손익 합계 2,500,000 원 조회`
+- `Advice Pipeline 시작: Agent 1 -> Agent 2 -> Agent 3`
+- `Gemini가 함수 실행을 요청했습니다. name=getUserPortfolio`
+- `DB에서 실시간 수익 54,000,000 원 감지 (종목: SAMSUNG_ELEC)`
+- `Gemini가 함수 실행을 요청했습니다. name=getRealizedGains`
+- `DB에서 확정 손익 합계 6,600,000 원 조회`
 
 ## Postman
 

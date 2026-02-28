@@ -17,6 +17,12 @@ public class TaxGraphicAgentService {
 
     public String createInfographic(String originalQuestion, String primaryStrategy, String auditReview) {
         log.info("Agent 3 (Designer): 인포그래픽 이미지 생성 요청 중...");
+        log.info(
+                "Agent 3 입력 요약: questionLength={}, primaryLength={}, auditLength={}",
+                normalize(originalQuestion).length(),
+                normalize(primaryStrategy).length(),
+                normalize(auditReview).length()
+        );
 
         if (!nanoBananaClient.isConfigured()) {
             log.warn("Agent 3 (Designer): Nano Banana API Key 미설정으로 이미지 생성을 건너뜁니다.");
@@ -30,6 +36,7 @@ public class TaxGraphicAgentService {
         );
 
         String prompt = buildEnglishPrompt(promptInput);
+        log.info("Agent 3 프롬프트 생성 완료: promptLength={}", prompt.length());
 
         try {
             String base64Image = nanoBananaClient.generateImageBase64(prompt)
@@ -41,7 +48,7 @@ public class TaxGraphicAgentService {
                 return "";
             }
 
-            log.info("Agent 3: 나노 바나나 이미지 렌더링 완료!");
+            log.info("Agent 3: 나노 바나나 이미지 렌더링 완료! base64Length={}", base64Image.length());
             return base64Image;
         } catch (Exception exception) {
             log.error("Agent 3 (Designer): 이미지 생성 중 오류가 발생했습니다.", exception);
