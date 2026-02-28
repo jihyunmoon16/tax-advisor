@@ -4,6 +4,22 @@ Spring Boot 기반의 MCP-style Agentic Tax Advisor 백엔드입니다.
 단순 질의응답 챗봇이 아니라, LLM이 함수 호출(`getUserPortfolio`, `getRealizedGains`)로 사용자 데이터를 직접 조회한 뒤 절세 전략을 수치로 제시합니다.
 세금 계산은 해커톤 데모용 단순 모델(`과세표준 x 22%`)을 사용합니다.
 
+## Project Description
+
+### English
+
+Tax Advisor is a Gemini-powered, tool-calling backend that helps individual investors make pre-trade tax decisions.  
+Instead of acting like a generic chatbot, it retrieves portfolio and realized-gain data through structured functions, then generates a quantified tax-loss-harvesting strategy.  
+A second audit agent reviews risks, and a third agent creates an infographic for clear communication.  
+Built with Spring Boot and deployed on Cloud Run, it demonstrates an end-to-end agent workflow: data retrieval, reasoning, auditing, and visualization in one API.
+
+### 한국어
+
+Tax Advisor는 Gemini 기반 함수 호출(Function Calling) 백엔드로, 개인 투자자의 매도 전 절세 의사결정을 돕는 서비스입니다.  
+단순 챗봇이 아니라 포트폴리오와 확정손익 데이터를 실제 툴로 조회한 뒤, 손실 실현(Tax-loss Harvesting) 중심 전략을 수치로 제시합니다.  
+이어 감사 에이전트가 리스크를 점검하고, 디자이너 에이전트가 인포그래픽을 생성해 결과를 직관적으로 보여줍니다.  
+Spring Boot + Cloud Run 기반으로, 데이터 조회부터 전략 생성·감사·시각화까지 하나의 API에서 처리하는 엔드투엔드 에이전트 워크플로우를 구현했습니다.
+
 ## 기술 스택
 
 - Java 21 (Java 17+ 호환 구조)
